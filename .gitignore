@@ -1,1 +1,6 @@
 node_modules
+_config.js
+package-lock.json
+package.json
+routes/index.js
+server.js
