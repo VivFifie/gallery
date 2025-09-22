@@ -1,26 +1,32 @@
-process.env.NODE_ENV = 'test';   
+const chai = require("chai");
+const chaiHttp = require("chai-http");
+const server = require("../server"); // 👈 import your Express app
 
-var chai = require('chai');
-var chaiHttp = require('chai-http');
-
-var server = require('../server');
-var should = chai.should();
-var expect = chai.expect;
-
+chai.should();
 chai.use(chaiHttp);
 
-describe('Photos', function(){
+describe("Photos", function () {
+  this.timeout(5000);
 
+  it("should load landing page with status 200", function (done) {
+    chai
+      .request(server)
+      .get("/") // Landing page
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.should.be.html;
+        done();
+      });
+  });
 
-    it('should list ALL photos on / GET', function(done){
-        this.timeout(60000);
-        chai.request(server)
-        .get('/')
-        .end(function(err,res){
-            res.should.have.status(200);
-            res.should.be.html;
-            res.body.should.be.a('object')
-            done();
-        })
-    });
-})
+  it("should list ALL photos on /image GET", function (done) {
+    chai
+      .request(server)
+      .get("/image")
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.a("array");
+        done();
+      });
+  });
+});

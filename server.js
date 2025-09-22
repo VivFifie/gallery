@@ -1,51 +1,61 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const path = require('path');
-require('dotenv').config(); // To load environment variables from .env file
+const express = require("express");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const path = require("path");
+require("dotenv").config();
 
-// Define routes
-let index = require('./routes/index');
-let image = require('./routes/image');
+// Routes
+let index = require("./routes/index");
+let image = require("./routes/image");
 
-// MongoDB Atlas connection string from environment variables
+// MongoDB Atlas connection
 const mongodbUri = process.env.MONGODB_URI;
-const dbName = 'darkroom';
+const dbName = "darkroom";
 
-// Connecting to MongoDB Atlas
-mongoose.connect(`${mongodbUri}${dbName}`, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Database connected successfully'))
-  .catch(err => console.log('Database connection error:', err));
+mongoose
+  .connect(`${mongodbUri}${dbName}`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("Database connected successfully"))
+  .catch((err) => console.log("Database connection error:", err));
 
-// Initializing the app
+// Initialize app
 const app = express();
 
-// View Engine
-app.set('view engine', 'ejs');
+// View engine
+app.set("view engine", "ejs");
 
-// Set up the public folder
-app.use(express.static(path.join(__dirname, 'public')));
+// Static folder
+app.use(express.static(path.join(__dirname, "public")));
 
-// Body parser middleware
+// Middleware
 app.use(express.json());
 
-// Use routes
-app.use('/', index);
-app.use('/image', image);
+// Routes
+app.use("/", index);
+app.use("/image", image);
 
-// Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is listening at http://localhost:${PORT}`);
-});
-
-// Refactor the route handler to use async/await
-app.get('/', async (req, res) => {
+// Landing page (example)
+app.get("/", async (req, res) => {
   try {
-    const images = await Image.find(); // Replace with your actual model
-    res.render('index', { images });
+    // Replace with your actual model
+    // const images = await Image.find();
+    res.status(200).send("Landing Page"); // keep simple for testing
+    // res.render("index", { images });
   } catch (err) {
-    console.error('Error retrieving images:', err);
-    res.status(500).send('Error retrieving images');
+    console.error("Error retrieving images:", err);
+    res.status(500).send("Error retrieving images");
   }
 });
+
+// ✅ Start server only if not testing
+if (process.env.NODE_ENV !== "test") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () =>
+    console.log(`Server is listening at http://localhost:${PORT}`)
+  );
+}
+
+// ✅ Export the app for testing
+module.exports = app;

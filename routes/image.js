@@ -1,36 +1,45 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-let Image = require('../models/images');
+let Image = require("../models/images");
 
-router.get('/:id', (req,res)=>{
-    // console.log(req);
-    Image.findById(req.params.id,function(err, image){
-        if (err) console.log(err)
-        // console.log(image);
-        res.render('singleImage', {title: 'Single Image', image:image})
-    } )
-})
+// API endpoint: return all images as JSON
+router.get("/", async (req, res) => {
+  try {
+    const images = await Image.find();
+    res.json(images);
+  } catch (err) {
+    console.error("Error fetching images:", err);
+    res.status(500).json({ error: "Failed to fetch images" });
+  }
+});
 
-router.put('/:id', (req,res) =>{
-    console.log(req.params.id)
-    console.log(req.body);
-    Image.updateOne({_id:req.params.id},{
-        $set:{
-            name:req.body.name
-        }
-    },{upsert: true}, function(err,image ){
-        if (err) console.log(err)
-        res.redirect('/')
-    })
-})
+// Render single image page
+router.get("/:id", (req, res) => {
+  Image.findById(req.params.id, function (err, image) {
+    if (err) console.log(err);
+    res.render("singleImage", { title: "Single Image", image: image });
+  });
+});
 
-router.delete('/:id', (req,res) =>{
-    console.log(req.params.id)
+// Update image name
+router.put("/:id", (req, res) => {
+  Image.updateOne(
+    { _id: req.params.id },
+    { $set: { name: req.body.name } },
+    { upsert: true },
+    function (err) {
+      if (err) console.log(err);
+      res.redirect("/");
+    }
+  );
+});
 
-    Image.deleteOne({_id: req.params.id}, function(err){
-        if (err) console.log(err)
-        res.redirect('/index')
-    })
-})
+// Delete image
+router.delete("/:id", (req, res) => {
+  Image.deleteOne({ _id: req.params.id }, function (err) {
+    if (err) console.log(err);
+    res.redirect("/index");
+  });
+});
 
-module.exports = router
+module.exports = router;
